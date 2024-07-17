@@ -3,101 +3,92 @@
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
  */
-define(['N/log', 'N/record', 'N/search'],
+/**********************************************************************************
+ * RSPDC-619 : Restrict Items Display in Opportunity & Estimate Records to Service Items
+ *
+ *
+ * ********************************************************************************
+ *
+ * ********************
+ * company name
+ *
+ * Author: Jobin and Jismi IT Services
+ *
+ *
+ * Date Created: 17-July-2024
+ *
+ * Description: To ensure that only service items are listed in the items subtab of the opportunity and 
+ * estimate records,we can also use a simpler approach by leveraging custom fields and filtering within the field setup. 
+ *
+ *
+ * REVISION HISTORY
+ *
+ * @version 1.0 company name: 17-July-2024: Created the initial build by JJ0352
+ *
+ *
+ *
+ **************/
+define(['N/log', 'N/record'],
     /**
      * @param{log} log
      * @param{record} record
-     * @param{search} search
+     
      */
-    function(log, record, search) {
+    function (log, record) {
+
         
-        function pageInit(scriptContext) {
-            // Page initialization code if any
-        }
-    
+
         function fieldChanged(scriptContext) {
             try {
                 let currentRecord = scriptContext.currentRecord;
                 let sublistId = 'item';
                 let serviceFieldId = 'custcol_jj_service_item_filter';
-                log.debug('fieldId', serviceFieldId);
-    
+                let itemFieldId = 'item';
+
+
+
                 if (scriptContext.fieldId === serviceFieldId && scriptContext.sublistId === sublistId) {
                     
-                    let lineCount = currentRecord.getLineCount({ sublistId: sublistId });
-                    for (let i = 0; i < lineCount; i++) {
-                        let serviceItemId = currentRecord.getSublistValue({
-                            sublistId: sublistId,
-                            fieldId: serviceFieldId,
-                            line: i
-                        });
-                        log.debug('Service Item ID', serviceItemId);
+                    // Get the service item ID from the current line
+                    let line = scriptContext.line;
+                    let serviceItemId = currentRecord.getCurrentSublistValue({
+                        sublistId: sublistId,
+                        fieldId: serviceFieldId
+                    });
+                   
+
+                    if (serviceItemId) {
+                        // Select the current line
                         currentRecord.selectLine({
                             sublistId: sublistId,
-                            line: i
+                            line: line
                         });
-    
+
                         // Set item field in sublist to selected service item
                         currentRecord.setCurrentSublistValue({
                             sublistId: sublistId,
-                            fieldId: 'item',
-                            value: serviceItemId,
-                            line: i
+                            fieldId: itemFieldId,
+                            value: serviceItemId
                         });
-    
+                       
+
                         // Commit the sublist line
                         currentRecord.commitLine({
                             sublistId: sublistId
                         });
+                        
                     }
                 }
             } catch (error) {
                 log.error('Error in fieldChanged', error);
             }
         }
-    
-        function postSourcing(scriptContext) {
-            // Post sourcing code if any
-        }
-    
-        function sublistChanged(scriptContext) {
-            // Sublist change code if any
-        }
-    
-        function lineInit(scriptContext) {
-            // Line initialization code if any
-        }
-    
-        function validateField(scriptContext) {
-            // Field validation code if any
-        }
-    
-        function validateLine(scriptContext) {
-            // Line validation code if any
-        }
-    
-        function validateInsert(scriptContext) {
-            // Insert validation code if any
-        }
-    
-        function validateDelete(scriptContext) {
-            // Delete validation code if any
-        }
-    
-        function saveRecord(scriptContext) {
-            // Record save validation code if any
-        }
-    
+
+        
+       
         return {
-            // pageInit: pageInit,
+            
             fieldChanged: fieldChanged
-            // postSourcing: postSourcing,
-            // sublistChanged: sublistChanged,
-            // lineInit: lineInit,
-            // validateField: validateField,
-            // validateLine: validateLine,
-            // validateInsert: validateInsert,
-            // validateDelete: validateDelete,
-            // saveRecord: saveRecord
+            
         };
     });
